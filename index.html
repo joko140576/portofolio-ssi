@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Input Portfolio Pegawai</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0F172A;
+    --navy-mid: #1E293B;
+    --accent: #3B82F6;
+    --accent-light: #EFF6FF;
+    --border: #E2E8F0;
+    --text-main: #0F172A;
+    --text-muted: #64748B;
+    --bg: #F8FAFC;
+    --white: #FFFFFF;
+    --success: #10B981;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--text-main);
+    min-height: 100vh;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--navy);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .topbar-logo {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+  .topbar-logo span { color: #60A5FA; }
+  .topbar-sep { width: 1px; height: 22px; background: rgba(255,255,255,0.15); margin: 0 6px; }
+  .topbar-sub { font-size: 13px; color: rgba(255,255,255,0.5); }
+  .topbar-nav { margin-left: auto; display: flex; gap: 4px; }
+  .topbar-nav a {
+    color: rgba(255,255,255,0.55);
+    font-size: 13px;
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: background .15s, color .15s;
+  }
+  .topbar-nav a:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .topbar-nav a.active { background: rgba(96,165,250,0.15); color: #60A5FA; }
+
+  /* PAGE LAYOUT */
+  .page-wrap { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  .page-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-header h1 { font-size: 22px; font-weight: 600; color: var(--text-main); }
+  .page-header p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+  /* SECTION CARD */
+  .section-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title i { font-size: 16px; color: var(--accent); }
+
+  /* FORM */
+  label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-main);
+    margin-bottom: 5px;
+    display: block;
+  }
+  .form-control, .form-select {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    font-size: 14px;
+    color: var(--text-main);
+    background: var(--white);
+    transition: border-color .2s, box-shadow .2s;
+    width: 100%;
+  }
+  .form-control:focus, .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    outline: none;
+  }
+  textarea.form-control { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+  /* JABATAN CHECKBOXES */
+  .jabatan-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+    margin-top: 2px;
+  }
+  .jabatan-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all .15s;
+    font-size: 13px;
+    color: var(--text-main);
+    user-select: none;
+    background: var(--bg);
+  }
+  .jabatan-item:hover { border-color: var(--accent); background: var(--accent-light); }
+  .jabatan-item input[type="checkbox"] { display: none; }
+  .jabatan-item.checked {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .jabatan-item.checked .chk-box {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .jabatan-item.checked .chk-box::after { content: ''; display: block; width: 5px; height: 8px; border: 2px solid #fff; border-top: none; border-left: none; transform: rotate(45deg) translate(-1px,-1px); }
+  .chk-box {
+    width: 16px; height: 16px;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+
+  /* SCORE FIELD */
+  .score-field {
+    border: 1.5px dashed #CBD5E1;
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    background: #FAFAFA;
+  }
+  .score-field label { margin-bottom: 8px; }
+  .score-row { display: flex; gap: 10px; align-items: flex-start; }
+  .score-row .num-wrap { flex: 0 0 100px; }
+  .score-row .desc-wrap { flex: 1; }
+
+  /* PREVIEW NILAI */
+  .nilai-preview {
+    background: var(--navy);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+  .nilai-preview .label { font-size: 13px; color: rgba(255,255,255,0.55); }
+  .nilai-preview .score { font-size: 36px; font-weight: 700; color: #fff; }
+  .nilai-preview .stars { font-size: 22px; letter-spacing: 2px; }
+  .nilai-preview .breakdown { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .nilai-preview .tag {
+    background: rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.75);
+  }
+
+  /* BTN SAVE */
+  .btn-save {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 11px 32px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background .15s, transform .1s;
+  }
+  .btn-save:hover { background: #2563EB; }
+  .btn-save:active { transform: scale(0.98); }
+  .btn-save:disabled { background: #94A3B8; cursor: not-allowed; }
+
+  /* TOAST */
+  .toast-wrap {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .toast {
+    background: var(--navy);
+    color: #fff;
+    padding: 14px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 260px;
+    animation: slideIn .25s ease;
+    border-left: 4px solid var(--success);
+  }
+  .toast.error { border-color: #EF4444; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .row { display: flex; flex-wrap: wrap; gap: 14px; }
+  .col-auto { flex: 1; min-width: 180px; }
+  .col-half { flex: 0 0 calc(50% - 7px); min-width: 180px; }
+  @media(max-width:640px) { .col-half { flex: 1 1 100%; } .jabatan-grid { grid-template-columns: 1fr 1fr; } }
+  .mt-1 { margin-top: 8px; }
+  .mb-0 { margin-bottom: 0; }
+</style>
+</head>
+<body>
+
+<nav class="topbar">
+  <span class="topbar-logo">PORTO<span>FOLIO</span></span>
+  <span class="topbar-sep"></span>
+  <span class="topbar-sub">Sistem Manajemen Talent</span>
+  <div class="topbar-nav">
+    <a href="index.html" class="active"><i class="ti ti-pencil"></i> Input</a>
+    <a href="dashboard-fortofolio.html"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="page-header">
+    <h1>Input Portfolio Pegawai</h1>
+    <p>Isi formulir di bawah untuk merekam data portfolio dan kompetensi pegawai.</p>
+  </div>
+
+  <!-- DATA DIRI -->
+  <div class="section-card">
+    <div class="section-title"><i class="ti ti-user-circle" aria-hidden="true"></i>Data Identitas</div>
+    <div class="row">
+      <div class="col-auto">
+        <label for="nik">NIK</label>
+        <input id="nik" class="form-control" placeholder="Nomor Induk Karyawan">
+      </div>
+      <div class="col-auto">
+        <label for="nama">Nama Lengkap</label>
+        <input id="nama" class="form-control" placeholder="Nama sesuai KTP">
+      </div>
+    </div>
+    <div class="row mt-1">
+      <div class="col-auto">
+        <label for="unitKerja">Unit Kerja</label>
+        <input id="unitKerja" class="form-control" placeholder="Contoh: SDM, Keuangan, IT...">
+      </div>
+      <div class="col-auto">
+        <label for="divisi">Divisi</label>
+        <select id="divisi" class="form-select">
+          <option value="">— Pilih Divisi —</option>
+          <option>OPR1</option>
+          <option>OPR2</option>
+          <option>OPS</option>
+          <option>FRM</option>
+          <option>SBD</option>
+          <option>MBS</option>
+          <option>HCC</option>
+          <option>PLM</option>
+          <option>INA</option>
+          <option>CSI</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <label for="region">Region</label>
+        <select id="region" class="form-select">
+          <option value="">— Pilih Region —</option>
+          <option>Kantor Pusat</option>
+          <option>Region 1</option>
+          <option>Region 2</option>
+          <option>Region 3</option>
+          <option>Region 4</option>
+          <option>Region 5</option>
+          <option>Region 6</option>
+          <option>Region 7</option>
+          <option>Region 8</option>
+          <option>Region 9</option>
+          <option>Region 10</option>
+        </select>
+      </div>
+    </div>
+    <div class="row mt-1">
+      <div class="col-auto" style="max-width:200px">
+        <label for="masaKerja">Masa Kerja (Tahun)</label>
+        <input id="masaKerja" type="number" min="0" class="form-control" placeholder="0">
+      </div>
+      <div class="col-auto" style="max-width:220px">
+        <label for="pendidikan">Pendidikan Terakhir</label>
+        <select id="pendidikan" class="form-select">
+          <option>SMA</option>
+          <option>Diploma</option>
+          <option>S1</option>
+          <option>S2</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIRKULASI JABATAN -->
+  <div class="section-card">
+    <div class="section-title"><i class="ti ti-briefcase" aria-hidden="true"></i>Sirkulasi Jabatan</div>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Pilih seluruh jabatan yang pernah dijabati oleh pegawai.</p>
+    <div class="jabatan-grid" id="jabatanGrid">
+      <!-- Generated by JS -->
+    </div>
+  </div>
+
+  <!-- KOMPETENSI -->
+  <div class="section-card">
+    <div class="section-title"><i class="ti ti-award" aria-hidden="true"></i>Pelatihan &amp; Kompetensi</div>
+
+    <div class="score-field">
+      <label><i class="ti ti-school" aria-hidden="true" style="font-size:14px;color:var(--accent)"></i> Pelatihan Eksternal</label>
+      <div class="score-row">
+        <div class="num-wrap">
+          <label for="ext" style="font-size:12px;color:var(--text-muted)">Jumlah</label>
+          <input id="ext" type="number" min="0" class="form-control" placeholder="0">
+        </div>
+        <div class="desc-wrap">
+          <label for="ketExt" style="font-size:12px;color:var(--text-muted)">Keterangan / Deskripsi</label>
+          <textarea id="ketExt" class="form-control" placeholder="Nama pelatihan, penyelenggara, tahun pelaksanaan..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="score-field">
+      <label><i class="ti ti-building-community" aria-hidden="true" style="font-size:14px;color:var(--accent)"></i> Pelatihan Internal</label>
+      <div class="score-row">
+        <div class="num-wrap">
+          <label for="int" style="font-size:12px;color:var(--text-muted)">Jumlah</label>
+          <input id="int" type="number" min="0" class="form-control" placeholder="0">
+        </div>
+        <div class="desc-wrap">
+          <label for="ketInt" style="font-size:12px;color:var(--text-muted)">Keterangan / Deskripsi</label>
+          <textarea id="ketInt" class="form-control" placeholder="Nama pelatihan, departemen penyelenggara, tahun..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="score-field">
+      <label><i class="ti ti-certificate" aria-hidden="true" style="font-size:14px;color:var(--accent)"></i> Sertifikasi</label>
+      <div class="score-row">
+        <div class="num-wrap">
+          <label for="sertifikasi" style="font-size:12px;color:var(--text-muted)">Jumlah</label>
+          <input id="sertifikasi" type="number" min="0" class="form-control" placeholder="0">
+        </div>
+        <div class="desc-wrap">
+          <label for="ketSertifikasi" style="font-size:12px;color:var(--text-muted)">Keterangan / Deskripsi</label>
+          <textarea id="ketSertifikasi" class="form-control" placeholder="Nama sertifikasi, lembaga penerbit, masa berlaku..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="score-field">
+      <label><i class="ti ti-bulb" aria-hidden="true" style="font-size:14px;color:var(--accent)"></i> Inovasi</label>
+      <div class="score-row">
+        <div class="num-wrap">
+          <label for="inovasi" style="font-size:12px;color:var(--text-muted)">Jumlah</label>
+          <input id="inovasi" type="number" min="0" class="form-control" placeholder="0">
+        </div>
+        <div class="desc-wrap">
+          <label for="ketInovasi" style="font-size:12px;color:var(--text-muted)">Keterangan / Deskripsi</label>
+          <textarea id="ketInovasi" class="form-control" placeholder="Judul inovasi, dampak, tahun implementasi..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="score-field" style="margin-bottom:0">
+      <label><i class="ti ti-layout-kanban" aria-hidden="true" style="font-size:14px;color:var(--accent)"></i> Project</label>
+      <div class="score-row">
+        <div class="num-wrap">
+          <label for="project" style="font-size:12px;color:var(--text-muted)">Jumlah</label>
+          <input id="project" type="number" min="0" class="form-control" placeholder="0">
+        </div>
+        <div class="desc-wrap">
+          <label for="ketProject" style="font-size:12px;color:var(--text-muted)">Keterangan / Deskripsi</label>
+          <textarea id="ketProject" class="form-control" placeholder="Nama project, peran, nilai project..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREVIEW NILAI -->
+  <div class="nilai-preview" id="nilaiPreview">
+    <div>
+      <div class="label">Total Nilai Portfolio</div>
+      <div class="score" id="previewScore">—</div>
+      <div class="stars" id="previewStars">—</div>
+    </div>
+    <div style="text-align:right">
+      <div class="label" style="margin-bottom:8px">Rincian Poin</div>
+      <div class="breakdown" id="previewBreakdown" style="justify-content:flex-end"></div>
+    </div>
+  </div>
+
+  <button class="btn-save" id="btnSave" onclick="simpanData()">
+    <i class="ti ti-device-floppy" aria-hidden="true"></i> Simpan Portfolio
+  </button>
+
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwEqkRaaGNz6hiLd32cbALK5ORdP0rdpbty8m1ABt_7kiqtrDG2yw7-I7B9llRrrYaV/exec";
+
+const JABATAN_LIST = ["Kasir","Restoker","FLM","SLM","Asmen","Manager","Senior Manager","Deputy","CEO Region","General Manager"];
+
+// Render jabatan checkboxes
+const grid = document.getElementById("jabatanGrid");
+JABATAN_LIST.forEach(j => {
+  const item = document.createElement("label");
+  item.className = "jabatan-item";
+  item.innerHTML = `<input type="checkbox" class="jabatan" value="${j}"><span class="chk-box"></span>${j}`;
+  item.addEventListener("change", () => {
+    item.classList.toggle("checked", item.querySelector("input").checked);
+    updatePreview();
+  });
+  grid.appendChild(item);
+});
+
+// Live score preview
+const scoreInputs = ["masaKerja","ext","int","sertifikasi","inovasi","project","pendidikan"];
+scoreInputs.forEach(id => {
+  const el = document.getElementById(id);
+  if(el) el.addEventListener("input", updatePreview);
+});
+
+function hitungNilai(){
+  let detail = {};
+  let total = 0;
+
+  let masa = parseInt(document.getElementById("masaKerja").value||0);
+  let mk = masa > 10 ? 15 : masa >= 5 ? 5 : 1;
+  detail["Masa Kerja"] = mk; total += mk;
+
+  let jabatanCount = document.querySelectorAll(".jabatan:checked").length;
+  let jb = jabatanCount > 5 ? 15 : jabatanCount >= 3 ? 5 : 1;
+  detail["Jabatan"] = jb; total += jb;
+
+  let pend = document.getElementById("pendidikan").value;
+  let pd = pend === "SMA" ? 1 : pend === "Diploma" ? 3 : pend === "S1" ? 5 : 10;
+  detail["Pendidikan"] = pd; total += pd;
+
+  let ext = parseInt(document.getElementById("ext").value||0);
+  let ex = ext > 5 ? 10 : ext >= 3 ? 3 : 1;
+  detail["Pel.Ext"] = ex; total += ex;
+
+  let intr = parseInt(document.getElementById("int").value||0);
+  let it = intr > 5 ? 10 : intr >= 3 ? 3 : 1;
+  detail["Pel.Int"] = it; total += it;
+
+  let sert = parseInt(document.getElementById("sertifikasi").value||0);
+  let se = sert > 3 ? 10 : sert > 0 ? 5 : 0;
+  detail["Sertifikasi"] = se; total += se;
+
+  let inov = parseInt(document.getElementById("inovasi").value||0);
+  let iv = inov > 5 ? 15 : inov >= 3 ? 10 : inov > 0 ? 5 : 0;
+  detail["Inovasi"] = iv; total += iv;
+
+  let proj = parseInt(document.getElementById("project").value||0);
+  let pr = proj > 5 ? 15 : proj >= 3 ? 10 : proj > 0 ? 5 : 0;
+  detail["Project"] = pr; total += pr;
+
+  return { total, detail };
+}
+
+function getRating(nilai){
+  if(nilai >= 90) return "⭐⭐⭐⭐⭐";
+  if(nilai >= 75) return "⭐⭐⭐⭐";
+  if(nilai >= 60) return "⭐⭐⭐";
+  if(nilai >= 40) return "⭐⭐";
+  return "⭐";
+}
+
+function updatePreview(){
+  const { total, detail } = hitungNilai();
+  document.getElementById("previewScore").textContent = total;
+  document.getElementById("previewStars").textContent = getRating(total);
+  const bd = document.getElementById("previewBreakdown");
+  bd.innerHTML = Object.entries(detail).map(([k,v]) =>
+    `<span class="tag">${k}: <b>${v}</b></span>`
+  ).join("");
+}
+
+updatePreview();
+
+function showToast(msg, isError = false){
+  const wrap = document.getElementById("toastWrap");
+  const t = document.createElement("div");
+  t.className = "toast" + (isError ? " error" : "");
+  t.innerHTML = `<i class="ti ti-${isError?"alert-circle":"circle-check"}" style="font-size:18px"></i>${msg}`;
+  wrap.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+async function simpanData(){
+  const btn = document.getElementById("btnSave");
+  const nik = document.getElementById("nik").value.trim();
+  const nama = document.getElementById("nama").value.trim();
+  if(!nik || !nama){
+    showToast("NIK dan Nama wajib diisi.", true);
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader" style="animation:spin 1s linear infinite"></i> Menyimpan...';
+
+  const { total, detail } = hitungNilai();
+  const rating = getRating(total);
+
+  const jabatanChecked = [...document.querySelectorAll(".jabatan:checked")].map(x => x.value).join(", ");
+
+  const body = {
+    nik: nik,
+    nama: nama,
+    unitKerja: document.getElementById("unitKerja").value,
+    divisi: document.getElementById("divisi").value,
+    region: document.getElementById("region").value,
+    masaKerja: document.getElementById("masaKerja").value,
+    jabatanCount: document.querySelectorAll(".jabatan:checked").length,
+    jabatanList: jabatanChecked,
+    pendidikan: document.getElementById("pendidikan").value,
+    pelatihanExt: document.getElementById("ext").value,
+    ketExt: document.getElementById("ketExt").value,
+    pelatihanInt: document.getElementById("int").value,
+    ketInt: document.getElementById("ketInt").value,
+    sertifikasi: document.getElementById("sertifikasi").value,
+    ketSertifikasi: document.getElementById("ketSertifikasi").value,
+    inovasi: document.getElementById("inovasi").value,
+    ketInovasi: document.getElementById("ketInovasi").value,
+    project: document.getElementById("project").value,
+    ketProject: document.getElementById("ketProject").value,
+    total: total,
+    rating: rating
+  };
+
+  try {
+    await fetch(API_URL, { method: "POST", body: JSON.stringify(body) });
+    showToast(`Berhasil disimpan! Nilai: ${total} — ${rating}`);
+    // Reset form
+    ["nik","nama","unitKerja","masaKerja","ext","int","sertifikasi","inovasi","project"].forEach(id => document.getElementById(id).value = "");
+    ["ketExt","ketInt","ketSertifikasi","ketInovasi","ketProject"].forEach(id => document.getElementById(id).value = "");
+    document.querySelectorAll(".jabatan:checked").forEach(cb => {
+      cb.checked = false;
+      cb.closest(".jabatan-item").classList.remove("checked");
+    });
+    updatePreview();
+  } catch(e) {
+    showToast("Gagal menyimpan. Cek koneksi.", true);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-device-floppy"></i> Simpan Portfolio';
+}
+</script>
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</body>
+</html>
