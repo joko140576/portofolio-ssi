@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Admin - Portfolio Pegawai</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --navy: #0F172A;
+    --navy-mid: #1E293B;
+    --accent: #3B82F6;
+    --accent-light: #EFF6FF;
+    --border: #E2E8F0;
+    --text-main: #0F172A;
+    --text-muted: #64748B;
+    --bg: #F8FAFC;
+    --white: #FFFFFF;
+    --success-bg: #ECFDF5;
+    --success-text: #065F46;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); font-family: 'Inter', -apple-system, sans-serif; color: var(--text-main); }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--navy);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .topbar-logo { font-size: 17px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+  .topbar-logo span { color: #60A5FA; }
+  .topbar-sep { width: 1px; height: 22px; background: rgba(255,255,255,0.15); margin: 0 6px; }
+  .topbar-sub { font-size: 13px; color: rgba(255,255,255,0.5); }
+  .topbar-nav { margin-left: auto; display: flex; gap: 4px; }
+  .topbar-nav a {
+    color: rgba(255,255,255,0.55); font-size: 13px; text-decoration: none;
+    padding: 6px 14px; border-radius: 6px; transition: background .15s, color .15s;
+  }
+  .topbar-nav a:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .topbar-nav a.active { background: rgba(96,165,250,0.15); color: #60A5FA; }
+
+  /* LAYOUT */
+  .main-wrap { padding: 2rem 2rem 4rem; max-width: 1400px; margin: 0 auto; }
+
+  .page-header { margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; }
+  .page-header h1 { font-size: 22px; font-weight: 600; }
+  .page-header p { font-size: 14px; color: var(--text-muted); margin-top: 3px; }
+  .reload-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--white); font-size: 13px; cursor: pointer; color: var(--text-main);
+    transition: background .15s;
+  }
+  .reload-btn:hover { background: var(--bg); }
+
+  /* STAT CARDS */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 1.75rem; }
+  .stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .stat-icon {
+    width: 46px; height: 46px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .stat-icon.blue { background: #EFF6FF; color: #2563EB; }
+  .stat-icon.green { background: #ECFDF5; color: #059669; }
+  .stat-icon.amber { background: #FFFBEB; color: #D97706; }
+  .stat-icon.purple { background: #F5F3FF; color: #7C3AED; }
+  .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--text-main); line-height: 1.2; margin-top: 2px; }
+
+  /* CHART AREA */
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 1.75rem; }
+  @media(max-width:768px) { .chart-grid { grid-template-columns: 1fr; } }
+  .chart-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+  }
+  .chart-title { font-size: 14px; font-weight: 600; margin-bottom: 1rem; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+  .chart-title i { color: var(--accent); }
+
+  /* TABLE */
+  .table-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+  }
+  .table-title { font-size: 14px; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .table-title i { color: var(--accent); }
+  table.dataTable thead th { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+  table.dataTable tbody td { font-size: 13px; padding: 10px 12px; color: var(--text-main); }
+  .badge-rating { padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-5 { background: #FEF3C7; color: #92400E; }
+  .badge-4 { background: #ECFDF5; color: #065F46; }
+  .badge-3 { background: #EFF6FF; color: #1D4ED8; }
+  .badge-2 { background: #F5F3FF; color: #5B21B6; }
+  .badge-1 { background: #FEF2F2; color: #991B1B; }
+  .nilai-pill {
+    display: inline-block; padding: 2px 10px; border-radius: 20px;
+    font-weight: 700; font-size: 13px; background: var(--accent-light); color: var(--accent);
+  }
+
+  /* LOADING */
+  .loading-wrap {
+    text-align: center; padding: 4rem 2rem;
+    color: var(--text-muted); font-size: 15px;
+  }
+  .spinner {
+    width: 36px; height: 36px; border: 3px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Filter bar */
+  .filter-bar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .filter-bar select, .filter-bar input {
+    padding: 7px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 13px; color: var(--text-main); background: var(--white);
+  }
+  .filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: var(--accent); }
+
+  /* LOGIN SCREEN */
+  .login-wrap {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--navy);
+    padding: 1rem;
+  }
+  .login-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 2.25rem 2rem;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 20px 45px rgba(0,0,0,0.25);
+  }
+  .login-logo { text-align: center; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .login-logo span { color: var(--accent); }
+  .login-sub { text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 1.75rem; }
+  .login-field { margin-bottom: 14px; }
+  .login-field label { display: block; font-size: 12px; font-weight: 600; color: var(--text-main); margin-bottom: 6px; }
+  .login-field input {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 14px; color: var(--text-main);
+  }
+  .login-field input:focus { outline: none; border-color: var(--accent); }
+  .login-btn {
+    width: 100%; padding: 11px; border: none; border-radius: var(--radius-sm);
+    background: var(--accent); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+    margin-top: 6px; transition: background .15s;
+  }
+  .login-btn:hover { background: #2563EB; }
+  .login-btn:disabled { opacity: 0.6; cursor: default; }
+  .login-error {
+    background: #FEF2F2; color: #991B1B; font-size: 13px; padding: 8px 12px;
+    border-radius: var(--radius-sm); margin-bottom: 14px; display: none;
+  }
+  .logout-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-sm);
+    background: transparent; font-size: 13px; cursor: pointer; color: rgba(255,255,255,0.7);
+  }
+  .logout-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- LAYAR LOGIN ADMIN -->
+<!-- ============================================================ -->
+<div class="login-wrap" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">PORTO<span>FOLIO</span></div>
+    <div class="login-sub">Masuk ke Dashboard Admin</div>
+
+    <div class="login-error" id="loginError">Username atau password salah.</div>
+
+    <div class="login-field">
+      <label for="loginUsername">Username</label>
+      <input type="text" id="loginUsername" autocomplete="username" required>
+    </div>
+    <div class="login-field">
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" autocomplete="current-password" required>
+    </div>
+    <button type="button" class="login-btn" id="loginBtn" onclick="doLogin()">Masuk</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- DASHBOARD ADMIN (tersembunyi sampai login berhasil) -->
+<!-- ============================================================ -->
+<div id="adminArea" style="display:none">
+
+<nav class="topbar">
+  <span class="topbar-logo">PORTO<span>FOLIO</span></span>
+  <span class="topbar-sep"></span>
+  <span class="topbar-sub">Sistem Manajemen Talent — Admin</span>
+  <div class="topbar-nav">
+    <a href="index.html"><i class="ti ti-pencil"></i> Input</a>
+    <a href="dashboard-umum.html"><i class="ti ti-table"></i> Dashboard Umum</a>
+    <a href="dashboard-admin.html" class="active"><i class="ti ti-layout-dashboard"></i> Dashboard Admin</a>
+  </div>
+  <button class="logout-btn" onclick="doLogout()"><i class="ti ti-logout" aria-hidden="true"></i> Keluar</button>
+</nav>
+
+<div class="main-wrap">
+
+  <div class="page-header">
+    <div>
+      <h1>Dashboard Portfolio Pegawai</h1>
+      <p>Rekapitulasi data talent dan kompetensi seluruh pegawai.</p>
+    </div>
+    <button class="reload-btn" onclick="loadDashboard()">
+      <i class="ti ti-refresh" aria-hidden="true"></i> Perbarui Data
+    </button>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div class="loading-wrap" id="loadingState">
+    <div class="spinner"></div>
+    Memuat data portfolio...
+  </div>
+
+  <!-- CONTENT (hidden until loaded) -->
+  <div id="mainContent" style="display:none">
+
+    <!-- STAT CARDS -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue"><i class="ti ti-users" aria-hidden="true"></i></div>
+        <div>
+          <div class="stat-label">Total Pegawai</div>
+          <div class="stat-value" id="totalPegawai">0</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><i class="ti ti-chart-bar" aria-hidden="true"></i></div>
+        <div>
+          <div class="stat-label">Rata-rata Nilai</div>
+          <div class="stat-value" id="avgNilai">0</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber"><i class="ti ti-star" aria-hidden="true"></i></div>
+        <div>
+          <div class="stat-label">Bintang 5</div>
+          <div class="stat-value" id="bintang5">0</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple"><i class="ti ti-trophy" aria-hidden="true"></i></div>
+        <div>
+          <div class="stat-label">Top Talent</div>
+          <div class="stat-value" id="topTalent" style="font-size:16px;font-weight:600;margin-top:4px">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Distribusi Nilai Portfolio</div>
+        <canvas id="chartNilai" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-donut" aria-hidden="true"></i>Top 10 Talent</div>
+        <canvas id="chartTalent" height="220"></canvas>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-title"><i class="ti ti-table" aria-hidden="true"></i>Data Portfolio Pegawai</div>
+
+      <div class="filter-bar">
+        <select id="filterDivisi" onchange="filterTable()">
+          <option value="">Semua Divisi</option>
+          <option>OPR1</option><option>OPR2</option><option>OPS</option>
+          <option>FRM</option><option>SBD</option><option>MBS</option>
+          <option>HCC</option><option>PLM</option><option>INA</option><option>CSI</option>
+        </select>
+        <select id="filterRegion" onchange="filterTable()">
+          <option value="">Semua Region</option>
+          <option>Kantor Pusat</option>
+          <option>Region 1</option><option>Region 2</option><option>Region 3</option>
+          <option>Region 4</option><option>Region 5</option><option>Region 6</option>
+          <option>Region 7</option><option>Region 8</option><option>Region 9</option><option>Region 10</option>
+        </select>
+        <select id="filterRating" onchange="filterTable()">
+          <option value="">Semua Rating</option>
+          <option>⭐⭐⭐⭐⭐</option>
+          <option>⭐⭐⭐⭐</option>
+          <option>⭐⭐⭐</option>
+          <option>⭐⭐</option>
+          <option>⭐</option>
+        </select>
+      </div>
+
+      <table id="tblPegawai" class="table table-striped" style="width:100%">
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Unit Kerja</th>
+            <th>Divisi</th>
+            <th>Region</th>
+            <th>Masa Kerja</th>
+            <th>Jabatan</th>
+            <th>Pendidikan</th>
+            <th>Pel.Ext</th>
+            <th>Pel.Int</th>
+            <th>Sertifikasi</th>
+            <th>Inovasi</th>
+            <th>Project</th>
+            <th>Nilai</th>
+            <th>Rating</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /#adminArea -->
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwzau344A2tG8sc3kqYqDPra-OCpcW3qnR3I56Q-CkJFhg3xdiTMD1772wvSZ9YLlwm/exec";
+
+let allData = [];
+let dtInstance = null;
+let chartNilai = null, chartTalent = null;
+
+function ratingBadge(r) {
+  const n = (r||"").split("⭐").length - 1;
+  const cls = ["","badge-1","badge-2","badge-3","badge-4","badge-5"][n] || "";
+  return `<span class="badge-rating ${cls}">${r}</span>`;
+}
+
+async function loadDashboard(){
+  document.getElementById("loadingState").style.display = "block";
+  document.getElementById("mainContent").style.display = "none";
+
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    allData = data;
+    renderDashboard(data);
+  } catch(e) {
+    document.getElementById("loadingState").innerHTML = `<div style="color:#EF4444;font-size:15px"><i class="ti ti-alert-circle" style="font-size:20px;vertical-align:-4px"></i> Gagal memuat data. Periksa koneksi Anda.</div>`;
+  }
+}
+
+function renderDashboard(data) {
+  if(!data || data.length === 0) {
+    document.getElementById("loadingState").innerHTML = `<div>Belum ada data portfolio.</div>`;
+    return;
+  }
+
+  let totalPegawai = data.length;
+  let totalNilai = 0, bintang5 = 0, topTalent = "", maxNilai = 0;
+  let labels = [], nilaiArr = [];
+  let tbody = "";
+
+  data.forEach(row => {
+    // Updated column mapping (GS now appends divisi, region, jabatanList)
+    // Col index (0-based):
+    // 0=timestamp, 1=nik, 2=nama, 3=unitKerja, 4=divisi, 5=region,
+    // 6=masaKerja, 7=jabatanCount, 8=jabatanList, 9=pendidikan,
+    // 10=pelatihanExt, 11=ketExt, 12=pelatihanInt, 13=ketInt,
+    // 14=sertifikasi, 15=ketSertifikasi, 16=inovasi, 17=ketInovasi,
+    // 18=project, 19=ketProject, 20=total, 21=rating
+    let nama = row[2] || "";
+    let unitKerja = row[3] || "";
+    let divisi = row[4] || "";
+    let region = row[5] || "";
+    let masaKerja = row[6] || "";
+    let jabatanCount = row[7] || "";
+    let pendidikan = row[9] || "";
+    let ext = row[10] || 0;
+    let internal = row[12] || 0;
+    let sertifikasi = row[14] || 0;
+    let inovasi = row[16] || 0;
+    let project = row[18] || 0;
+    let nilai = Number(row[20]) || 0;
+    let rating = row[21] || "⭐";
+
+    totalNilai += nilai;
+    if(rating === "⭐⭐⭐⭐⭐") bintang5++;
+    if(nilai > maxNilai){ maxNilai = nilai; topTalent = nama; }
+    labels.push(nama);
+    nilaiArr.push(nilai);
+
+    tbody += `<tr>
+      <td><b>${nama}</b></td>
+      <td>${unitKerja}</td>
+      <td>${divisi}</td>
+      <td>${region}</td>
+      <td>${masaKerja} th</td>
+      <td>${jabatanCount}</td>
+      <td>${pendidikan}</td>
+      <td>${ext}</td>
+      <td>${internal}</td>
+      <td>${sertifikasi}</td>
+      <td>${inovasi}</td>
+      <td>${project}</td>
+      <td><span class="nilai-pill">${nilai}</span></td>
+      <td>${ratingBadge(rating)}</td>
+    </tr>`;
+  });
+
+  document.getElementById("totalPegawai").textContent = totalPegawai;
+  document.getElementById("avgNilai").textContent = (totalNilai / totalPegawai).toFixed(1);
+  document.getElementById("bintang5").textContent = bintang5;
+  document.getElementById("topTalent").textContent = topTalent;
+
+  document.querySelector("#tblPegawai tbody").innerHTML = tbody;
+
+  if(dtInstance){ dtInstance.destroy(); }
+  dtInstance = $('#tblPegawai').DataTable({
+    language: {
+      search: "Cari:",
+      lengthMenu: "Tampilkan _MENU_ data",
+      info: "Menampilkan _START_–_END_ dari _TOTAL_ data",
+      paginate: { previous: "‹", next: "›" }
+    },
+    pageLength: 10
+  });
+
+  // Chart Nilai
+  if(chartNilai) chartNilai.destroy();
+  chartNilai = new Chart(document.getElementById("chartNilai"), {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Nilai Portfolio",
+        data: nilaiArr,
+        backgroundColor: "rgba(59,130,246,0.7)",
+        borderRadius: 5,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: "rgba(0,0,0,0.04)" } },
+        x: { ticks: { maxRotation: 45, font: { size: 11 } }, grid: { display: false } }
+      }
+    }
+  });
+
+  // Chart Top 10
+  let top10 = [...data].sort((a,b) => b[20]-a[20]).slice(0,10);
+  const colors = ["#3B82F6","#8B5CF6","#10B981","#F59E0B","#EF4444","#06B6D4","#F97316","#84CC16","#EC4899","#6366F1"];
+  if(chartTalent) chartTalent.destroy();
+  chartTalent = new Chart(document.getElementById("chartTalent"), {
+    type: "doughnut",
+    data: {
+      labels: top10.map(x => x[2]),
+      datasets: [{
+        data: top10.map(x => Number(x[20])),
+        backgroundColor: colors,
+        borderWidth: 2,
+        borderColor: "#fff"
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { position: "right", labels: { font: { size: 11 }, boxWidth: 12 } }
+      }
+    }
+  });
+
+  document.getElementById("loadingState").style.display = "none";
+  document.getElementById("mainContent").style.display = "block";
+}
+
+function filterTable() {
+  const divisi = document.getElementById("filterDivisi").value.toLowerCase();
+  const region = document.getElementById("filterRegion").value.toLowerCase();
+  const rating = document.getElementById("filterRating").value;
+
+  if(!dtInstance) return;
+  // Custom search using draw
+  $.fn.dataTable.ext.search.length = 0;
+  $.fn.dataTable.ext.search.push(function(settings, rowData){
+    const d = divisi ? (rowData[2]||"").toLowerCase() === divisi : true;
+    const r = region ? (rowData[3]||"").toLowerCase() === region : true;
+    const rt = rating ? (rowData[13]||"").includes(rating.replace(/\uFE0F/g,"")) : true;
+    return d && r && rt;
+  });
+  dtInstance.draw();
+}
+
+// ============================================================
+// LOGIN ADMIN
+// ============================================================
+const SESSION_KEY = "portofolio_admin_logged_in";
+
+function showApp() {
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("adminArea").style.display = "block";
+  loadDashboard();
+}
+
+function showLogin(errorMsg) {
+  document.getElementById("adminArea").style.display = "none";
+  document.getElementById("loginScreen").style.display = "flex";
+  const errEl = document.getElementById("loginError");
+  if (errorMsg) {
+    errEl.textContent = errorMsg;
+    errEl.style.display = "block";
+  } else {
+    errEl.style.display = "none";
+  }
+}
+
+async function doLogin() {
+  const username = document.getElementById("loginUsername").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
+  const btn = document.getElementById("loginBtn");
+
+  if (!username || !password) return;
+
+  btn.disabled = true;
+  btn.textContent = "Memeriksa...";
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "login", username, password })
+    });
+    const result = await res.json();
+
+    if (result.success) {
+      sessionStorage.setItem(SESSION_KEY, "1");
+      showApp();
+    } else {
+      showLogin(result.message || "Username atau password salah.");
+    }
+  } catch (e) {
+    showLogin("Gagal terhubung ke server. Coba lagi.");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Masuk";
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem(SESSION_KEY);
+  showLogin();
+}
+
+// Izinkan submit dengan tombol Enter
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("loginPassword").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") doLogin();
+  });
+  document.getElementById("loginUsername").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") doLogin();
+  });
+});
+
+// Cek sesi saat halaman dimuat
+if (sessionStorage.getItem(SESSION_KEY) === "1") {
+  showApp();
+} else {
+  showLogin();
+}
+</script>
+</body>
+</html>
