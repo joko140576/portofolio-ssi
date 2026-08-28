@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Umum - Biodata Pegawai</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0F172A;
+    --accent: #3B82F6;
+    --border: #E2E8F0;
+    --text-main: #0F172A;
+    --text-muted: #64748B;
+    --bg: #F8FAFC;
+    --white: #FFFFFF;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); font-family: 'Inter', -apple-system, sans-serif; color: var(--text-main); }
+
+  .topbar {
+    background: var(--navy);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .topbar-logo { font-size: 17px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+  .topbar-logo span { color: #60A5FA; }
+  .topbar-sep { width: 1px; height: 22px; background: rgba(255,255,255,0.15); margin: 0 6px; }
+  .topbar-sub { font-size: 13px; color: rgba(255,255,255,0.5); }
+  .topbar-nav { margin-left: auto; display: flex; gap: 4px; }
+  .topbar-nav a {
+    color: rgba(255,255,255,0.55); font-size: 13px; text-decoration: none;
+    padding: 6px 14px; border-radius: 6px; transition: background .15s, color .15s;
+  }
+  .topbar-nav a:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .topbar-nav a.active { background: rgba(96,165,250,0.15); color: #60A5FA; }
+
+  .main-wrap { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
+
+  .page-header { margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+  .page-header h1 { font-size: 22px; font-weight: 600; }
+  .page-header p { font-size: 14px; color: var(--text-muted); margin-top: 3px; }
+  .reload-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--white); font-size: 13px; cursor: pointer; color: var(--text-main);
+  }
+  .reload-btn:hover { background: var(--bg); }
+
+  .table-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+  }
+  table.dataTable thead th { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+  table.dataTable tbody td { font-size: 13px; padding: 10px 12px; color: var(--text-main); }
+
+  .loading-wrap { text-align: center; padding: 4rem 2rem; color: var(--text-muted); font-size: 15px; }
+  .spinner {
+    width: 36px; height: 36px; border: 3px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<nav class="topbar">
+  <span class="topbar-logo">PORTO<span>FOLIO</span></span>
+  <span class="topbar-sep"></span>
+  <span class="topbar-sub">Sistem Manajemen Talent</span>
+  <div class="topbar-nav">
+    <a href="index.html"><i class="ti ti-pencil"></i> Input</a>
+    <a href="dashboard-umum.html" class="active"><i class="ti ti-table"></i> Dashboard Umum</a>
+    <a href="dashboard-admin.html"><i class="ti ti-layout-dashboard"></i> Dashboard Admin</a>
+  </div>
+</nav>
+
+<div class="main-wrap">
+
+  <div class="page-header">
+    <div>
+      <h1>Biodata Pegawai</h1>
+      <p>Data umum seluruh pegawai.</p>
+    </div>
+    <button class="reload-btn" onclick="loadData()">
+      <i class="ti ti-refresh" aria-hidden="true"></i> Perbarui Data
+    </button>
+  </div>
+
+  <div class="loading-wrap" id="loadingState">
+    <div class="spinner"></div>
+    Memuat data...
+  </div>
+
+  <div class="table-card" id="tableCard" style="display:none">
+    <table id="tblBiodata" class="table table-striped" style="width:100%">
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Unit Kerja</th>
+          <th>Divisi</th>
+          <th>Region</th>
+          <th>Masa Kerja</th>
+          <th>Jabatan</th>
+          <th>Pendidikan</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwzau344A2tG8sc3kqYqDPra-OCpcW3qnR3I56Q-CkJFhg3xdiTMD1772wvSZ9YLlwm/exec";
+
+let dtInstance = null;
+
+async function loadData() {
+  document.getElementById("loadingState").style.display = "block";
+  document.getElementById("tableCard").style.display = "none";
+
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    renderTable(data);
+  } catch (e) {
+    document.getElementById("loadingState").innerHTML =
+      `<div style="color:#EF4444"><i class="ti ti-alert-circle" style="font-size:20px;vertical-align:-4px"></i> Gagal memuat data. Periksa koneksi Anda.</div>`;
+  }
+}
+
+function renderTable(data) {
+  if (!data || data.length === 0) {
+    document.getElementById("loadingState").innerHTML = `<div>Belum ada data pegawai.</div>`;
+    return;
+  }
+
+  // Index kolom dari Google Sheet (lihat Code.gs):
+  // 2=nama, 3=unitKerja, 4=divisi, 5=region, 6=masaKerja, 7=jabatanCount, 9=pendidikan
+  let tbody = "";
+  data.forEach(row => {
+    const nama = row[2] || "";
+    const unitKerja = row[3] || "";
+    const divisi = row[4] || "";
+    const region = row[5] || "";
+    const masaKerja = row[6] || "";
+    const jabatan = row[7] || "";
+    const pendidikan = row[9] || "";
+
+    tbody += `<tr>
+      <td><b>${nama}</b></td>
+      <td>${unitKerja}</td>
+      <td>${divisi}</td>
+      <td>${region}</td>
+      <td>${masaKerja} th</td>
+      <td>${jabatan}</td>
+      <td>${pendidikan}</td>
+    </tr>`;
+  });
+
+  document.querySelector("#tblBiodata tbody").innerHTML = tbody;
+
+  if (dtInstance) dtInstance.destroy();
+  dtInstance = $('#tblBiodata').DataTable({
+    language: {
+      search: "Cari:",
+      lengthMenu: "Tampilkan _MENU_ data",
+      info: "Menampilkan _START_–_END_ dari _TOTAL_ data",
+      paginate: { previous: "‹", next: "›" }
+    },
+    pageLength: 10
+  });
+
+  document.getElementById("loadingState").style.display = "none";
+  document.getElementById("tableCard").style.display = "block";
+}
+
+loadData();
+</script>
+</body>
+</html>
