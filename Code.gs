@@ -1,9 +1,11 @@
 // ============================================================
 //  PORTOFOLIO PEGAWAI — Google Apps Script
 //  Updated: mendukung field unitKerja, divisi, region, jabatanList
+//  Updated: mendukung login admin (sheet USERS)
 // ============================================================
 
 const SHEET_NAME = "DATA_PEGAWAI";
+const USERS_SHEET_NAME = "USERS"; // Sheet baru: kolom A = username, kolom B = password
 
 function doGet() {
   return ContentService
@@ -14,8 +16,47 @@ function doGet() {
 }
 
 function doPost(e) {
-  const data = JSON.parse(e.postData.contents);
+  const body = JSON.parse(e.postData.contents);
 
+  // Jika request adalah percobaan login admin
+  if (body.action === "login") {
+    return handleLogin(body);
+  }
+
+  // Selain itu, dianggap sebagai penyimpanan data portofolio (perilaku lama, tidak berubah)
+  return simpanDataPegawai(body);
+}
+
+function handleLogin(body) {
+  const sh = SpreadsheetApp
+    .getActiveSpreadsheet()
+    .getSheetByName(USERS_SHEET_NAME);
+
+  if (!sh) {
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        success: false,
+        message: "Sheet USERS belum dibuat. Buat sheet bernama 'USERS' dengan kolom: username | password"
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const data = sh.getDataRange().getValues();
+  data.shift(); // hapus baris header
+
+  const username = String(body.username || "").trim();
+  const password = String(body.password || "").trim();
+
+  const found = data.some(function (row) {
+    return String(row[0]).trim() === username && String(row[1]).trim() === password;
+  });
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ success: found }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function simpanDataPegawai(data) {
   const sh = SpreadsheetApp
     .getActiveSpreadsheet()
     .getSheetByName(SHEET_NAME);
